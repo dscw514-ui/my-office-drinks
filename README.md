@@ -2,7 +2,7 @@
 
 辦公室團購飲料：開團 → 分享連結到 LINE → 同事各自點餐 → 彙總給店家 → 列印分發單。同事不用登入、不用註冊帳號。
 
-網站：https://evanchi1111-sys.github.io/office-drinks/](https://dscw514-ui.github.io/my-office-drinks/
+網站：https://dscw514-ui.github.io/my-office-drinks/
 
 - **開團**：選飲料店與這次參加的人（名單上所有人，或勾選指定成員），可分享 `?g=團編號` 連結
 - **訂購**：選單位與姓名（會記住）、搜尋品項、規格／甜度／冰量／加料／備註、一次多杯；「常點的」一鍵再訂；可修改、刪除自己的訂單
