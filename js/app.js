@@ -240,6 +240,7 @@ function viewApp() {
   else pane = S.tab === 'menu' ? viewMenu() : viewRoster();
   return `${head}
     ${S.error ? `<p class="err">更新失敗：${esc(S.error)}</p>` : ''}
+    <section class="hero-intro" aria-label="歡迎使用飲料訂購系統"><div><p class="hero-eyebrow">FRESH · SIMPLE · CONNECTED</p><h2>今天想喝什麼？</h2><p>一杯好飲料，讓工作更有活力。<strong> 輕鬆點、一起訂！</strong></p></div></section>
     ${viewSessionBar(cur)}
     <nav class="tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" class="tab ${S.tab === k ? 'on' : ''}" aria-selected="${S.tab === k}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</nav>
     <main class="pane">${pane}</main>
