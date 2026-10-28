@@ -219,6 +219,18 @@ function confirmBtn(key, label, confirmLabel, attrs = '', cls = 'danger') {
 const chips = (bind, options, value, disabled = []) =>
   `<div class="chips">${options.map((o) => `<button type="button" class="chip ${o === value ? 'on' : ''}" data-act="pick" data-bind="${bind}" data-v="${esc(o)}" ${disabled.includes(o) ? 'disabled' : ''} aria-pressed="${o === value}">${esc(o)}</button>`).join('')}</div>`;
 
+// 飲品視覺分類：依品名自動選擇圖示，不需要更動菜單資料格式。
+function drinkVisual(name = '') {
+  const n = String(name);
+  if (/珍珠|波霸|粉圓|黑糖|布丁|仙草|粉粿|椰果/.test(n)) return ['🧋', 'bubble'];
+  if (/拿鐵|鮮奶|奶茶|奶綠|奶蓋|厚奶|歐蕾|乳/.test(n)) return ['🥛', 'milk'];
+  if (/咖啡|美式|濃縮|摩卡|卡布/.test(n)) return ['☕', 'coffee'];
+  if (/檸檬|柳橙|葡萄柚|百香|鳳梨|芒果|水果|果茶|莓|蘋果|柚/.test(n)) return ['🍋', 'fruit'];
+  if (/抹茶|綠茶|青茶|烏龍|紅茶|鐵觀音|四季春|冬瓜|普洱|茶/.test(n)) return ['🍵', 'tea'];
+  if (/冰沙|雪克|冰淇淋|可可|巧克力/.test(n)) return ['🍧', 'ice'];
+  return ['🥤', 'classic'];
+}
+
 function viewApp() {
   const liveDot = DEMO ? '<span class="live demo">示範模式</span>'
     : `<span class="live ${S.live}">${S.live === 'live' ? '即時同步' : S.live === 'connecting' ? '連線中…' : '離線・自動重試'}</span>`;
@@ -240,11 +252,25 @@ function viewApp() {
   else pane = S.tab === 'menu' ? viewMenu() : viewRoster();
   return `${head}
     ${S.error ? `<p class="err">更新失敗：${esc(S.error)}</p>` : ''}
-    <section class="hero-intro" aria-label="歡迎使用飲料訂購系統"><div><p class="hero-eyebrow">FRESH · SIMPLE · CONNECTED</p><h2>今天想喝什麼？</h2><p>一杯好飲料，讓工作更有活力。<strong> 輕鬆點、一起訂！</strong></p></div></section>
+    <section class="hero-intro" aria-label="歡迎使用飲料訂購系統"><div><p class="hero-eyebrow">✦ OFFICE DRINKS / DIGITAL ORDERING</p><h2>今天的好心情，<br><em>從一杯飲料開始。</em></h2><p>輕鬆選購 · 即時同步 · 團購更有效率</p></div></section>
     ${viewSessionBar(cur)}
+    ${viewPulse(cur)}
     <nav class="tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" class="tab ${S.tab === k ? 'on' : ''}" aria-selected="${S.tab === k}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</nav>
     <main class="pane">${pane}</main>
     ${DEMO ? `<p class="foot">示範模式：資料只存在這個分頁，重新整理就會還原。管理密碼 <code>${esc(S.backend.demoPassword)}</code></p>` : ''}`;
+}
+
+function viewPulse(cur) {
+  if (!cur) return '';
+  const orders = sessionOrders(cur);
+  const people = new Set(orders.map(o => `${o.unit || ''}::${o.name || ''}`)).size;
+  const shop = shopOf(cur);
+  return `<section class="pulse" aria-label="團購資訊">
+    <div class="pulse-tile"><span class="pulse-icon">◈</span><div><small>ORDER COUNT</small><strong>${orders.length}<sub> 杯</sub></strong><span>目前訂購</span></div></div>
+    <div class="pulse-tile"><span class="pulse-icon">◎</span><div><small>PARTICIPANTS</small><strong>${people}<sub> 人</sub></strong><span>參與人數</span></div></div>
+    <div class="pulse-tile"><span class="pulse-icon">＄</span><div><small>TOTAL AMOUNT</small><strong>$${totalOf(orders)}</strong><span>訂購總金額</span></div></div>
+    <div class="pulse-tile"><span class="pulse-icon">⌁</span><div><small>SELECTED STORE</small><strong class="store-name">${esc(shop?.name || cur.shop_name || '尚未選擇')}</strong><span>${cur.status === 'open' ? '● 正在接受訂購' : '○ 訂購已結束'}</span></div></div>
+  </section>`;
 }
 
 function viewSessionBar(cur) {
@@ -337,7 +363,7 @@ function viewOrder(session) {
       <input type="search" class="search" data-k="q" data-bind="f.q" data-rerender placeholder="🔍 搜尋品名" value="${esc(f.q)}">
       <ul class="menu" data-scroll="menu">
         ${filtered.map((i) => `<li><button type="button" class="menu-item ${f.item === i.n ? 'on' : ''}" data-act="pickItem" data-v="${esc(i.n)}">
-          <span>${esc(i.n)}</span>
+          <span class="drink-ident"><span class="drink-icon ${drinkVisual(i.n)[1]}" aria-hidden="true">${drinkVisual(i.n)[0]}</span><span class="drink-title">${esc(i.n)}<small>${({bubble:'BOBA SPECIAL',milk:'MILK SERIES',coffee:'COFFEE',fruit:'FRUIT FRESH',tea:'TEA COLLECTION',ice:'ICE BLEND',classic:'SIGNATURE'})[drinkVisual(i.n)[1]]}</small></span></span>
           <span class="prices">${shop.sizes.map((s, k) => (i.p[k] != null ? `${esc(s)} $${i.p[k]}` : null)).filter(Boolean).join(' / ')}</span>
         </button></li>`).join('')}
         ${filtered.length ? '' : '<li class="empty">找不到符合的飲料</li>'}
