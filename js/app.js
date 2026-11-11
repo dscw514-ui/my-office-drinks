@@ -219,18 +219,6 @@ function confirmBtn(key, label, confirmLabel, attrs = '', cls = 'danger') {
 const chips = (bind, options, value, disabled = []) =>
   `<div class="chips">${options.map((o) => `<button type="button" class="chip ${o === value ? 'on' : ''}" data-act="pick" data-bind="${bind}" data-v="${esc(o)}" ${disabled.includes(o) ? 'disabled' : ''} aria-pressed="${o === value}">${esc(o)}</button>`).join('')}</div>`;
 
-// 飲品視覺分類：依品名自動選擇圖示，不需要更動菜單資料格式。
-function drinkVisual(name = '') {
-  const n = String(name);
-  if (/珍珠|波霸|粉圓|黑糖|布丁|仙草|粉粿|椰果/.test(n)) return ['🧋', 'bubble'];
-  if (/拿鐵|鮮奶|奶茶|奶綠|奶蓋|厚奶|歐蕾|乳/.test(n)) return ['🥛', 'milk'];
-  if (/咖啡|美式|濃縮|摩卡|卡布/.test(n)) return ['☕', 'coffee'];
-  if (/檸檬|柳橙|葡萄柚|百香|鳳梨|芒果|水果|果茶|莓|蘋果|柚/.test(n)) return ['🍋', 'fruit'];
-  if (/抹茶|綠茶|青茶|烏龍|紅茶|鐵觀音|四季春|冬瓜|普洱|茶/.test(n)) return ['🍵', 'tea'];
-  if (/冰沙|雪克|冰淇淋|可可|巧克力/.test(n)) return ['🍧', 'ice'];
-  return ['🥤', 'classic'];
-}
-
 function viewApp() {
   const liveDot = DEMO ? '<span class="live demo">示範模式</span>'
     : `<span class="live ${S.live}">${S.live === 'live' ? '即時同步' : S.live === 'connecting' ? '連線中…' : '離線・自動重試'}</span>`;
@@ -252,25 +240,10 @@ function viewApp() {
   else pane = S.tab === 'menu' ? viewMenu() : viewRoster();
   return `${head}
     ${S.error ? `<p class="err">更新失敗：${esc(S.error)}</p>` : ''}
-    <section class="hero-intro" aria-label="歡迎使用飲料訂購系統"><div><p class="hero-eyebrow">✦ OFFICE DRINKS / DIGITAL ORDERING</p><h2>今天的好心情，<br><em>從一杯飲料開始。</em></h2><p>輕鬆選購 · 即時同步 · 團購更有效率</p></div></section>
     ${viewSessionBar(cur)}
-    ${viewPulse(cur)}
     <nav class="tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" class="tab ${S.tab === k ? 'on' : ''}" aria-selected="${S.tab === k}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</nav>
     <main class="pane">${pane}</main>
     ${DEMO ? `<p class="foot">示範模式：資料只存在這個分頁，重新整理就會還原。管理密碼 <code>${esc(S.backend.demoPassword)}</code></p>` : ''}`;
-}
-
-function viewPulse(cur) {
-  if (!cur) return '';
-  const orders = sessionOrders(cur);
-  const people = new Set(orders.map(o => `${o.unit || ''}::${o.name || ''}`)).size;
-  const shop = shopOf(cur);
-  return `<section class="pulse" aria-label="團購資訊">
-    <div class="pulse-tile"><span class="pulse-icon">◈</span><div><small>ORDER COUNT</small><strong>${orders.length}<sub> 杯</sub></strong><span>目前訂購</span></div></div>
-    <div class="pulse-tile"><span class="pulse-icon">◎</span><div><small>PARTICIPANTS</small><strong>${people}<sub> 人</sub></strong><span>參與人數</span></div></div>
-    <div class="pulse-tile"><span class="pulse-icon">＄</span><div><small>TOTAL AMOUNT</small><strong>$${totalOf(orders)}</strong><span>訂購總金額</span></div></div>
-    <div class="pulse-tile"><span class="pulse-icon">⌁</span><div><small>SELECTED STORE</small><strong class="store-name">${esc(shop?.name || cur.shop_name || '尚未選擇')}</strong><span>${cur.status === 'open' ? '● 正在接受訂購' : '○ 訂購已結束'}</span></div></div>
-  </section>`;
 }
 
 function viewSessionBar(cur) {
@@ -299,32 +272,6 @@ function viewPending(groups, pickable) {
       : `<span class="pname static">${esc(n)}</span>`).join('')}</span></div>`).join('')}
     ${pickable ? '<p class="hint">點名字可以直接幫那個人點。</p>' : ''}
   </section>`;
-}
-
-// V3: 可選擇在 assets/drinks/ 放入品項照片；無照片時顯示分類圖示。
-function photoFile(name) {
-  return 'assets/drinks/' + encodeURIComponent(name).replace(/%20/g, '%20') + '.webp';
-}
-function shopBadge(name) {
-  const initials = [...String(name || '飲料')].slice(0, 2).join('');
-  return `<span class="shop-logo" aria-label="${esc(name)} 店家標誌"><span>${esc(initials)}</span></span>`;
-}
-function drinkPhoto(name) {
-  const [icon, kind] = drinkVisual(name);
-  return `<span class="photo-wrap ${kind}"><img class="drink-photo" src="${photoFile(name)}" alt="${esc(name)}飲品照片" loading="lazy" onerror="this.style.display='none'"/><span class="photo-fallback" aria-hidden="true">${icon}</span></span>`;
-}
-function viewCart(session, mine, itemObj, price, open) {
-  const total = mine.reduce((sum, o) => sum + (Number(o.price) || 0), 0);
-  const pending = itemObj && price != null ? price * (S.f.editId ? 1 : S.f.qty) : 0;
-  return `<aside class="cart-sidebar card" aria-label="我的訂單側邊欄">
-    <div class="cart-heading"><div><small>YOUR ORDER</small><h3>🛒 我的購物車 <span class="cart-count">${mine.length}</span></h3></div><span class="cart-live">${open ? '● 開放訂購' : '● 已截止'}</span></div>
-    <div class="cart-shop">${shopBadge(session.shop_name)}<span><b>${esc(session.shop_name)}</b><small>本次團購店家</small></span></div>
-    ${mine.length ? `<ul class="cart-items">${mine.map(o=>`<li><span class="cart-item-icon">${drinkVisual(o.item || o.drink || o.n || '')[0]}</span><span class="cart-item-name">${esc(drinkLabel(o))}</span><b>$${Number(o.price)||0}</b>${open ? btn('editOrder','✎',{cls:'icon',attrs:`data-id="${esc(o.id)}" aria-label="修改訂單"`}) : ''}</li>`).join('')}</ul>` : '<p class="cart-empty">尚未加入飲料。先從左側選擇喜歡的品項吧！</p>'}
-    ${itemObj && price != null ? `<div class="cart-preview"><small>目前選擇 · 尚未送出</small><b>${esc(itemObj.n)}</b><span>${S.f.qty} 杯 · $${pending}</span></div>` : ''}
-    <div class="cart-total"><span>已送出訂單金額</span><strong>NT$ ${total}</strong></div>
-    <p class="cart-note">選好飲品、甜度及冰量後，請按「加入訂單」送出。此側欄僅顯示已送出的訂單及目前選擇預覽。</p>
-    <a class="cart-anchor" href="#drink">＋ 繼續選購飲料</a>
-  </aside>`;
 }
 
 function viewOrder(session) {
@@ -385,11 +332,11 @@ function viewOrder(session) {
     </section>` : ''}
 
     <section class="card" id="drink">
-      <h3 class="row-h">2. 選飲料${f.editId ? '（修改中）' : ''}<span class="shop">${shopBadge(session.shop_name)}${esc(session.shop_name)}${tel}</span></h3>
+      <h3 class="row-h">2. 選飲料${f.editId ? '（修改中）' : ''}<span class="shop">${esc(session.shop_name)}${tel}</span></h3>
       <input type="search" class="search" data-k="q" data-bind="f.q" data-rerender placeholder="🔍 搜尋品名" value="${esc(f.q)}">
       <ul class="menu" data-scroll="menu">
         ${filtered.map((i) => `<li><button type="button" class="menu-item ${f.item === i.n ? 'on' : ''}" data-act="pickItem" data-v="${esc(i.n)}">
-          <span class="drink-ident">${drinkPhoto(i.n)}<span class="drink-title">${esc(i.n)}<small>${({bubble:'BOBA SPECIAL',milk:'MILK SERIES',coffee:'COFFEE',fruit:'FRUIT FRESH',tea:'TEA COLLECTION',ice:'ICE BLEND',classic:'SIGNATURE'})[drinkVisual(i.n)[1]]}</small></span></span>
+          <span>${esc(i.n)}</span>
           <span class="prices">${shop.sizes.map((s, k) => (i.p[k] != null ? `${esc(s)} $${i.p[k]}` : null)).filter(Boolean).join(' / ')}</span>
         </button></li>`).join('')}
         ${filtered.length ? '' : '<li class="empty">找不到符合的飲料</li>'}
@@ -413,7 +360,6 @@ function viewOrder(session) {
       </div>` : ''}
     </section>
 
-    ${viewCart(session, mine, itemObj, price, open)}
     ${name ? `<section class="card">
       <h3>${esc(name)} 在這團的訂單（${mine.length} 杯）</h3>
       ${mine.length ? `<ul class="list">${mine.map((o) => `<li>
