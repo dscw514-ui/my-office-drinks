@@ -301,6 +301,32 @@ function viewPending(groups, pickable) {
   </section>`;
 }
 
+// V3: 可選擇在 assets/drinks/ 放入品項照片；無照片時顯示分類圖示。
+function photoFile(name) {
+  return 'assets/drinks/' + encodeURIComponent(name).replace(/%20/g, '%20') + '.webp';
+}
+function shopBadge(name) {
+  const initials = [...String(name || '飲料')].slice(0, 2).join('');
+  return `<span class="shop-logo" aria-label="${esc(name)} 店家標誌"><span>${esc(initials)}</span></span>`;
+}
+function drinkPhoto(name) {
+  const [icon, kind] = drinkVisual(name);
+  return `<span class="photo-wrap ${kind}"><img class="drink-photo" src="${photoFile(name)}" alt="${esc(name)}飲品照片" loading="lazy" onerror="this.style.display='none'"/><span class="photo-fallback" aria-hidden="true">${icon}</span></span>`;
+}
+function viewCart(session, mine, itemObj, price, open) {
+  const total = mine.reduce((sum, o) => sum + (Number(o.price) || 0), 0);
+  const pending = itemObj && price != null ? price * (S.f.editId ? 1 : S.f.qty) : 0;
+  return `<aside class="cart-sidebar card" aria-label="我的訂單側邊欄">
+    <div class="cart-heading"><div><small>YOUR ORDER</small><h3>🛒 我的購物車 <span class="cart-count">${mine.length}</span></h3></div><span class="cart-live">${open ? '● 開放訂購' : '● 已截止'}</span></div>
+    <div class="cart-shop">${shopBadge(session.shop_name)}<span><b>${esc(session.shop_name)}</b><small>本次團購店家</small></span></div>
+    ${mine.length ? `<ul class="cart-items">${mine.map(o=>`<li><span class="cart-item-icon">${drinkVisual(o.item || o.drink || o.n || '')[0]}</span><span class="cart-item-name">${esc(drinkLabel(o))}</span><b>$${Number(o.price)||0}</b>${open ? btn('editOrder','✎',{cls:'icon',attrs:`data-id="${esc(o.id)}" aria-label="修改訂單"`}) : ''}</li>`).join('')}</ul>` : '<p class="cart-empty">尚未加入飲料。先從左側選擇喜歡的品項吧！</p>'}
+    ${itemObj && price != null ? `<div class="cart-preview"><small>目前選擇 · 尚未送出</small><b>${esc(itemObj.n)}</b><span>${S.f.qty} 杯 · $${pending}</span></div>` : ''}
+    <div class="cart-total"><span>已送出訂單金額</span><strong>NT$ ${total}</strong></div>
+    <p class="cart-note">選好飲品、甜度及冰量後，請按「加入訂單」送出。此側欄僅顯示已送出的訂單及目前選擇預覽。</p>
+    <a class="cart-anchor" href="#drink">＋ 繼續選購飲料</a>
+  </aside>`;
+}
+
 function viewOrder(session) {
   const shop = shopOf(session);
   if (!shop) return '<p class="empty">這個團的飲料店已被刪除，請重新開一團。</p>';
@@ -359,11 +385,11 @@ function viewOrder(session) {
     </section>` : ''}
 
     <section class="card" id="drink">
-      <h3 class="row-h">2. 選飲料${f.editId ? '（修改中）' : ''}<span class="shop">${esc(session.shop_name)}${tel}</span></h3>
+      <h3 class="row-h">2. 選飲料${f.editId ? '（修改中）' : ''}<span class="shop">${shopBadge(session.shop_name)}${esc(session.shop_name)}${tel}</span></h3>
       <input type="search" class="search" data-k="q" data-bind="f.q" data-rerender placeholder="🔍 搜尋品名" value="${esc(f.q)}">
       <ul class="menu" data-scroll="menu">
         ${filtered.map((i) => `<li><button type="button" class="menu-item ${f.item === i.n ? 'on' : ''}" data-act="pickItem" data-v="${esc(i.n)}">
-          <span class="drink-ident"><span class="drink-icon ${drinkVisual(i.n)[1]}" aria-hidden="true">${drinkVisual(i.n)[0]}</span><span class="drink-title">${esc(i.n)}<small>${({bubble:'BOBA SPECIAL',milk:'MILK SERIES',coffee:'COFFEE',fruit:'FRUIT FRESH',tea:'TEA COLLECTION',ice:'ICE BLEND',classic:'SIGNATURE'})[drinkVisual(i.n)[1]]}</small></span></span>
+          <span class="drink-ident">${drinkPhoto(i.n)}<span class="drink-title">${esc(i.n)}<small>${({bubble:'BOBA SPECIAL',milk:'MILK SERIES',coffee:'COFFEE',fruit:'FRUIT FRESH',tea:'TEA COLLECTION',ice:'ICE BLEND',classic:'SIGNATURE'})[drinkVisual(i.n)[1]]}</small></span></span>
           <span class="prices">${shop.sizes.map((s, k) => (i.p[k] != null ? `${esc(s)} $${i.p[k]}` : null)).filter(Boolean).join(' / ')}</span>
         </button></li>`).join('')}
         ${filtered.length ? '' : '<li class="empty">找不到符合的飲料</li>'}
@@ -387,6 +413,7 @@ function viewOrder(session) {
       </div>` : ''}
     </section>
 
+    ${viewCart(session, mine, itemObj, price, open)}
     ${name ? `<section class="card">
       <h3>${esc(name)} 在這團的訂單（${mine.length} 杯）</h3>
       ${mine.length ? `<ul class="list">${mine.map((o) => `<li>
