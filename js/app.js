@@ -236,7 +236,7 @@ function viewApp() {
     : `<span class="live ${S.live}">${S.live === 'live' ? '即時同步' : S.live === 'connecting' ? '連線中…' : '離線・自動重試'}</span>`;
   const head = `<header class="top">
     <div class="brand"><span class="logo" aria-hidden="true">🧋</span><h1>辦公室飲料訂購</h1></div>
-    <div class="top-r">${liveDot}${S.pw
+    <div class="top-r"><a class="btn ghost sm" href="meal.html">🍽️ 聚餐管理</a>${liveDot}${S.pw
       ? btn('logout', '🔓 管理者（登出）', { cls: 'ghost sm' })
       : btn('gate', '🔒 管理者', { cls: 'ghost sm' })}</div>
   </header>`;
