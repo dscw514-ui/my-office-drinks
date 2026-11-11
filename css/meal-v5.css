@@ -1,7 +1,0 @@
-/* V5: four tabs match the original drink interface. */
-.meal-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.meal-tabs button{min-width:0}
-.meal-group-management{margin:16px 0;padding:18px;border:1px solid #d5e7ed;border-radius:18px;background:#f7fcff}
-.meal-check{display:flex!important;align-items:center;gap:10px}
-.meal-check input{width:18px;height:18px;flex:none}
-@media(max-width:540px){.meal-tabs{gap:4px}.meal-tabs button{padding:10px 2px;font-size:13px}.meal-group-management{padding:12px}}
