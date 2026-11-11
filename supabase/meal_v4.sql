@@ -7,6 +7,13 @@ create table if not exists public.od_meal_events (
  status text not null default 'open' check(status in ('open','closed')),
  created_at timestamptz not null default now()
 );
+create table if not exists public.od_meal_restaurants (
+ id uuid primary key default gen_random_uuid(), name text not null unique check(length(name) between 1 and 100),
+ adult_price integer not null check(adult_price>=0), child_price integer not null check(child_price>=0),
+ height_cm integer not null check(height_cm between 1 and 250),
+ note text not null default '', created_at timestamptz not null default now()
+);
+alter table public.od_meal_events add column if not exists restaurant_name text not null default '';
 create table if not exists public.od_meal_registrations (
  id uuid primary key default gen_random_uuid(), event_id uuid not null references public.od_meal_events(id) on delete cascade,
  unit text not null, name text not null, family_adults integer not null check(family_adults>=0),
@@ -26,12 +33,13 @@ create table if not exists public.od_meal_audit (
  action text not null, actor text not null default 'admin', detail jsonb not null default '{}'::jsonb,
  created_at timestamptz not null default now()
 );
+alter table public.od_meal_restaurants enable row level security;
 alter table public.od_meal_events enable row level security;
 alter table public.od_meal_registrations enable row level security;
 alter table public.od_meal_allocations enable row level security;
 alter table public.od_meal_audit enable row level security;
 -- 不提供匿名表格直讀（涉及人名、補助）；只由管理密碼驗證的 RPC 讀取。
-revoke all on public.od_meal_events, public.od_meal_registrations, public.od_meal_allocations, public.od_meal_audit from anon, authenticated;
+revoke all on public.od_meal_restaurants, public.od_meal_events, public.od_meal_registrations, public.od_meal_allocations, public.od_meal_audit from anon, authenticated;
 
 create or replace function public.od_meal_manage(p_password text, p_action text, p_payload jsonb default '{}'::jsonb)
 returns jsonb language plpgsql security definer set search_path=public as $$
@@ -42,14 +50,22 @@ BEGIN
  if err is not null then return jsonb_build_object('ok',false,'error',err); end if;
  if p_action='list' then
   return jsonb_build_object('ok',true,
+    'restaurants',coalesce((select jsonb_agg(to_jsonb(x) order by x.name) from public.od_meal_restaurants x),'[]'::jsonb),
     'events',coalesce((select jsonb_agg(to_jsonb(x) order by x.created_at desc) from public.od_meal_events x),'[]'::jsonb),
     'registrations',coalesce((select jsonb_agg(to_jsonb(x)) from public.od_meal_registrations x),'[]'::jsonb),
     'allocations',coalesce((select jsonb_agg(to_jsonb(x)) from public.od_meal_allocations x),'[]'::jsonb));
+ elsif p_action='restaurant' then
+  n:=trim(coalesce(p_payload->>'name',''));
+  if length(n)<1 or length(n)>100 then raise exception '餐廳名稱不正確'; end if;
+  insert into public.od_meal_restaurants(name,adult_price,child_price,height_cm,note)
+  values(n,(p_payload->>'adult_price')::int,(p_payload->>'child_price')::int,(p_payload->>'height_cm')::int,left(coalesce(p_payload->>'note',''),500))
+  on conflict(name) do update set adult_price=excluded.adult_price,child_price=excluded.child_price,height_cm=excluded.height_cm,note=excluded.note;
+  return jsonb_build_object('ok',true);
  elsif p_action='event' then
   if coalesce(length(trim(p_payload->>'title')),0)=0 or length(p_payload->>'title')>100 then raise exception '活動名稱不正確'; end if;
-  insert into public.od_meal_events(title,quota,adult_price,child_price,height_cm)
+  insert into public.od_meal_events(title,quota,adult_price,child_price,height_cm,restaurant_name)
   values(trim(p_payload->>'title'),(p_payload->>'quota')::int,(p_payload->>'adult_price')::int,
-         (p_payload->>'child_price')::int,(p_payload->>'height_cm')::int) returning id into eid;
+         (p_payload->>'child_price')::int,(p_payload->>'height_cm')::int,left(coalesce(p_payload->>'restaurant_name',''),100)) returning id into eid;
   insert into public.od_meal_audit(event_id,action,detail) values(eid,'create_event',p_payload);
   return jsonb_build_object('ok',true,'id',eid);
  elsif p_action='status' then
