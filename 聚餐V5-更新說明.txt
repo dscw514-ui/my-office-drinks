@@ -1,0 +1,4 @@
+聚餐管理 V5：開新團比照飲料訂購，選擇全部人員或指定參加人員。
+先在 Supabase SQL Editor 執行 supabase/meal_participants_v5.sql，再更新 GitHub Pages 網站。
+既有活動 eligible_members=NULL，代表所有人皆可登記。指定參加人員以單位與姓名比對。
+注意：本次 SQL 以 V4 為基礎，勿重跑舊版 meal_credit_v1.sql。
