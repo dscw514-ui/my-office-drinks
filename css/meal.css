@@ -1,3 +1,50 @@
 .meal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 0}.meal-head h1{margin:0}.meal-box{background:#fff;border:1px solid #dbe8ef;border-radius:18px;padding:20px;margin:16px 0;box-shadow:0 8px 30px #1b53750d}.meal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}.meal-field{display:flex;flex-direction:column;gap:6px}.meal-field input,.meal-field select{padding:12px;border:1px solid #bcd3de;border-radius:10px;width:100%;background:#fff;color:#173b51}.meal-field label{font-weight:600}.meal-line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e6edf2}.meal-tools{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.meal-tools button,.meal-tools a{border:0;border-radius:11px;background:#0e7490;color:white;padding:10px 16px;cursor:pointer;text-decoration:none}.meal-tools button.secondary{background:#e8f4f7;color:#13526a}.meal-tools button:disabled{opacity:.45;cursor:not-allowed}.meal-muted{color:#667d8a;font-size:.9rem}.meal-error{background:#fff0f0;color:#a32727;padding:12px;border-radius:10px}.meal-ok{background:#e6f7ee;color:#166b48;padding:12px;border-radius:10px}.meal-lenders{max-height:260px;overflow:auto;border:1px solid #dce8ee;border-radius:10px;padding:12px}.meal-lenders label{display:block;padding:5px}.meal-stat{font-size:1.5rem;font-weight:700;color:#0c7184}.meal-table{width:100%;border-collapse:collapse}.meal-table th,.meal-table td{padding:9px;border-bottom:1px solid #dbe8ef;text-align:left}.meal-scroll{overflow-x:auto}@media(max-width:600px){.meal-box{padding:14px}}
 
 .meal-new{border:2px solid #9acbd9}.meal-mode{display:flex;gap:20px;flex-wrap:wrap;padding:10px 0}.meal-mode label{cursor:pointer}.meal-unit{padding:12px 0;border-top:1px solid #dbe8ef}.meal-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-top:10px}.meal-picker label{padding:8px;border:1px solid #dbe8ef;border-radius:9px;cursor:pointer}.meal-picker input{margin-right:6px}
+
+/* V6 · Sunny Dining: scoped to the meal page only */
+:root{--meal-coral:#f26e61;--meal-orange:#f6a33a;--meal-ink:#563c39;--meal-cream:#fffaf1;--meal-pink:#fff0e9}
+body:has(#meal-app){background:radial-gradient(ellipse at 10% 5%,#fff0da 0,transparent 34%),radial-gradient(ellipse at 94% 20%,#ffe6e3 0,transparent 34%),linear-gradient(160deg,#fffdf8,#fff8f1 60%,#fffdf8);color:var(--meal-ink)}
+#meal-app{padding-bottom:60px}
+#meal-app .meal-head{position:relative;overflow:hidden;align-items:flex-start;padding:32px clamp(20px,4vw,44px);margin:20px 0 22px;border-radius:28px;background:linear-gradient(110deg,#ff8e72 0%,#ffac67 53%,#ffd68c 100%);box-shadow:0 18px 38px #d9754930;color:#fff}
+#meal-app .meal-head:before{content:'🍓';position:absolute;right:19%;top:15px;font-size:48px;opacity:.22;transform:rotate(-14deg)}
+#meal-app .meal-head:after{content:'🥐';position:absolute;right:7%;bottom:-23px;font-size:105px;opacity:.28;transform:rotate(16deg);pointer-events:none}
+#meal-app .meal-hero-copy{position:relative;z-index:1}
+#meal-app .meal-head h1{font-size:clamp(25px,3.4vw,39px);letter-spacing:.02em;line-height:1.3;text-shadow:0 2px 8px #a9564224}
+#meal-app .meal-eyebrow{display:inline-block;font-size:11px;letter-spacing:.16em;font-weight:800;margin-bottom:8px;color:#fffaf4}
+#meal-app .meal-hero-sub{display:block;font-size:15px;color:#fffdf6;margin-top:8px}
+#meal-app .meal-hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:19px}
+#meal-app .meal-hero-tags span{background:#ffffff30;border:1px solid #ffffff72;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;backdrop-filter:blur(5px)}
+#meal-app .meal-head .meal-tools{position:relative;z-index:1;margin:0}
+#meal-app .meal-head .meal-tools a,#meal-app .meal-head .meal-tools button{background:#fff;color:#b54e43;box-shadow:0 5px 16px #a65a3b22;font-weight:800}
+#meal-app .meal-head .meal-tools button.secondary{background:#fff7f2;color:#a65349}
+#meal-app .meal-section-intro{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:22px 2px 10px;color:#8b5a4e;font-weight:800}
+#meal-app .meal-section-intro small{font-weight:500;color:#ad8276}
+#meal-app .meal-box{background:#fffefb;border:1px solid #f4e5d9;border-radius:22px;box-shadow:0 9px 28px #b9805c13;padding:24px;transition:box-shadow .2s,transform .2s}
+#meal-app .meal-box h2{color:#a95042;font-size:1.32rem;margin-top:0}
+#meal-app .meal-box h3{color:#995b49}
+#meal-app .meal-new{border:2px solid #ffb69b;background:linear-gradient(145deg,#fffdf9,#fff5ec)}
+#meal-app .meal-field label{color:#75564d}
+#meal-app .meal-field input,#meal-app .meal-field select{border:1px solid #ecd9cb;background:#fffdf9;border-radius:12px;min-height:45px;color:#563c39;transition:border-color .15s,box-shadow .15s}
+#meal-app .meal-field input:focus,#meal-app .meal-field select:focus{outline:none;border-color:#f18a70;box-shadow:0 0 0 3px #ff9e802b}
+#meal-app .meal-tools button,#meal-app .meal-tools a{border-radius:12px;background:linear-gradient(135deg,#f47764,#ed9860);color:#fff;font-weight:750;box-shadow:0 5px 12px #ed8b6930;transition:transform .15s,filter .15s}
+#meal-app .meal-tools button:hover:not(:disabled),#meal-app .meal-tools a:hover{transform:translateY(-2px);filter:brightness(1.035)}
+#meal-app .meal-tools button.secondary{background:#fff0e9;color:#ac5c4d;box-shadow:none}
+#meal-app .meal-muted{color:#98796c}
+#meal-app .meal-stat{color:#e67850}
+#meal-app .meal-line{border-bottom-color:#f6e9df}
+#meal-app .meal-lenders{border:1px solid #f0ddce;background:#fffaf5;border-radius:15px}
+#meal-app .meal-lenders label,#meal-app .meal-picker label{border-radius:10px;transition:background .15s}
+#meal-app .meal-lenders label:hover,#meal-app .meal-picker label:hover{background:#fff0e4}
+#meal-app .meal-picker label{border-color:#efdccd;background:#fffdf9}
+#meal-app .meal-table th{background:#fff2e8;color:#975344}
+#meal-app .meal-table th,#meal-app .meal-table td{border-bottom-color:#f2e4d9}
+#meal-app .meal-table tbody tr:hover{background:#fffaf3}
+#meal-app .meal-error{background:#fff1ee;color:#ad4136}
+#meal-app .meal-ok{background:#eaf8ef;color:#27724b}
+#meal-app .meal-tabs{display:flex;flex-wrap:wrap;gap:8px;background:#fff7f0;border:1px solid #f3e1d4;padding:7px;border-radius:17px;margin-bottom:14px}
+#meal-app .meal-tabs .tab{flex:1;min-width:90px;border-radius:11px;border:0;background:transparent;color:#9b6d60;font-weight:800;padding:12px 14px;transition:background .15s,transform .15s}
+#meal-app .meal-tabs .tab:hover{background:#ffe8db}
+#meal-app .meal-tabs .tab.on{background:#fff;color:#d9674c;box-shadow:0 3px 12px #b97b5a24}
+@media(max-width:650px){#meal-app .meal-head{padding:25px 20px;border-radius:21px}#meal-app .meal-head:after{font-size:75px}#meal-app .meal-box{padding:17px;border-radius:17px}#meal-app .meal-section-intro{align-items:flex-start;flex-direction:column}#meal-app .meal-tabs .tab{min-width:calc(50% - 8px)}#meal-app .meal-hero-tags{gap:5px}}
+@media(prefers-reduced-motion:reduce){#meal-app *{transition:none!important}}
