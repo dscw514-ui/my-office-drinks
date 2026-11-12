@@ -1,0 +1,12 @@
+聚餐管理權限修正（2026-11-12）
+
+已修改 js/meal.js：
+1. 聚餐資料透過 od_meal_manage RPC list 讀取，不再直接查詢受保護的聚餐資料表。
+2. 餐廳、新活動、狀態、登記、修改、刪除統一使用現有 od_meal_manage 動作。
+3. 改用現有 UUID 結構、od_meal_allocations、family_adults/family_children、cost。
+4. 人員名單仍讀取飲料系統 od_units。
+
+部署：將壓縮檔內 my-office-drinks-main 資料夾中的網站檔案上傳至 GitHub Pages 專案根目錄。
+請勿執行內附 supabase/meal_credit_v1.sql：該檔是舊版 text ID schema，與目前 UUID 資料庫不相容。
+請先使用管理者密碼載入資料。
+尚未在真實 Supabase 環境完成端到端測試。

@@ -1,0 +1,20 @@
+聚餐管理：自由文字門檻 + 兩種未達門檻費用
+
+更新順序：
+1. 備份 Supabase 資料庫與目前的 od_meal_manage 函式。
+2. 在 Supabase SQL Editor 執行 supabase/meal_threshold_v2.sql（整份執行一次）。
+3. SQL 執行成功後，再將網站檔案部署至 GitHub Pages。
+4. 清除瀏覽器快取並重新載入 meal.html。
+5. 測試餐廳建立、開團、兩種門檻人數登記、修改、刪除、CSV 匯出。
+
+新欄位：
+- od_meal_restaurants.threshold_text：自由文字門檻
+- od_meal_restaurants.child_price2：未達門檻2費用
+- od_meal_events.threshold_text、child_price2：開團時價格快照
+- od_meal_registrations.family_children2：未達門檻2人數
+
+保留舊 height_cm、child_price、family_children 欄位與既有資料。
+舊活動價格保持原狀；新開活動會使用新門檻及兩種費用。
+
+注意：此版本尚未在你的 Supabase 線上資料庫執行測試。
+請勿執行舊版 meal_credit_v1.sql，它與目前 UUID 架構不相容。

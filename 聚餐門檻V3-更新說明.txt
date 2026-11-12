@@ -1,0 +1,4 @@
+聚餐門檻 V3：將門檻說明拆成「門檻1說明」及「門檻2說明」，分別對應未達門檻1/2費用。
+請先備份 Supabase，執行 supabase/meal_threshold_v3.sql，再更新 GitHub Pages 網頁。
+V3 SQL 保留舊欄位與既有資料，會將原門檻說明帶入門檻1，門檻2預設留白。
+請勿重新執行舊版 meal_credit_v1.sql。
