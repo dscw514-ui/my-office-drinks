@@ -10,7 +10,7 @@ const restaurant=()=>state.data?.restaurants.find(x=>x.name===event()?.restauran
 const regs=()=>state.data?.regs.filter(x=>x.event_id===state.event)||[];
 const credits=()=>state.data?.credits.filter(x=>x.event_id===state.event)||[];
 const selectedPerson=()=>members().find(p=>p.unit+'|'+p.name===state.person);
-const allowedMembers=()=>{const e=event();return !e||e.eligible_members===null||e.eligible_members===undefined?members():members().filter(p=>e.eligible_members.some(k=>k.unit===p.unit&&k.name===p.name))};
+const allowedMembers=()=>{const e=event();return !e||e.eligible_members===null||e.eligible_members===undefined?members():members().filter(p=>(Array.isArray(e.eligible_members)?e.eligible_members:[]).some(k=>k.unit===p.unit&&k.name===p.name))};
 const total=()=>state.adults*(event()?.adult_price||0)+state.children*(event()?.child_price||0)+state.children2*(event()?.child_price2||0);
 const opts=(list,value,label)=>list.map(x=>`<option value="${h(value(x))}">${h(label(x))}</option>`).join('');
 function show(){
@@ -42,7 +42,7 @@ function viewOrder(e,r,g,c){if(!e)return '<section class="meal-box">請先選擇
  <div class="meal-field"><label>登記人員</label><select id="person"><option value="">選擇姓名</option>${opts(eligible,p=>p.unit+'|'+p.name,p=>p.unit+' / '+p.name)}</select></div>
  <div class="meal-field"><label>成人／達身高門檻人數（含本人）</label><input id="adults" type="number" min="1" max="100" value="${state.adults}"></div>
  <div class="meal-field"><label>未達門檻1人數</label><input id="children" type="number" min="0" max="100" value="${state.children}"></div><div class="meal-field"><label>未達門檻2人數</label><input id="children2" type="number" min="0" max="100" value="${state.children2}"></div></div>
- ${e.eligible_members!==null&&e.eligible_members!==undefined?`<p class="meal-muted">本團指定 ${eligible.length} 位參加人員；其他同事仍可提供補助額度。</p>`:''}<h3>使用本人或其他同事額度（未參加也可以提供）</h3><p class="meal-muted">每位同事在同一活動只能提供一次額度；需要先取得同事同意。已使用額度者無法再選。</p>
+ ${Array.isArray(e.eligible_members)?`<p class="meal-muted">本團指定 ${eligible.length} 位參加人員；其他同事仍可提供補助額度。</p>`:''}<h3>使用本人或其他同事額度（未參加也可以提供）</h3><p class="meal-muted">每位同事在同一活動只能提供一次額度；需要先取得同事同意。已使用額度者無法再選。</p>
  <div class="meal-lenders">${people.map(p=>{const key=p.unit+'|'+p.name;const used=c.some(x=>x.lender_unit===p.unit&&x.lender_name===p.name&&x.registration_id!==state.edit);const isOwn=key===state.person;return `<label><input type="checkbox" data-lender="${h(key)}" ${(used||(!r?.allow_borrow&&!isOwn))?'disabled':''}> ${h(p.unit)}／${h(p.name)} ${used?'（額度已使用）':''}${isOwn?'（本人）':''}</label>`}).join('')}</div>
  <div class="meal-line"><span>原始總費用</span><strong>${money(cost)}</strong></div><div class="meal-line"><span>額度抵扣</span><strong>${money(discount)}</strong></div><div class="meal-line"><span>實際應付</span><strong class="meal-stat">${money(Math.max(0,remaining))}</strong></div>
  <div class="meal-tools"><button data-action="save" ${e.status!=='open'||!own||remaining<0?'disabled':''}>${state.edit?'儲存修改':'送出登記'}</button><button class="secondary" data-action="reset">清除／取消修改</button></div></section>`;
